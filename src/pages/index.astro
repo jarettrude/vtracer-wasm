@@ -1,0 +1,26 @@
+---
+import App from '../components/App.svelte';
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Free online image to SVG converter. Convert raster images to vector graphics entirely in your browser. No uploads, complete privacy." />
+    <meta name="theme-color" content="#169255" />
+    <link rel="icon" type="image/svg+xml" href="/vtracer-wasm/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/vtracer-wasm/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/vtracer-wasm/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/vtracer-wasm/favicon-16x16.png" />
+    <link rel="shortcut icon" href="/vtracer-wasm/favicon.ico" />
+    <link rel="manifest" href="/vtracer-wasm/site.webmanifest" />
+    <title>VTracer WASM - 100% Client-Side Image to SVG</title>
+  </head>
+  <body class="min-h-screen text-gray-100 bg-black">
+    <div class="w-full max-w-[3840px] mx-auto px-4">
+      <App client:load />
+    </div>
+  </body>
+</html>

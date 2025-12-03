@@ -1,0 +1,16 @@
+{
+  "name": "vtracer-wasm",
+  "type": "module",
+  "description": "VTracer WASM bindings for browser",
+  "version": "1.0.0",
+  "files": [
+    "vtracer_wasm_bg.wasm",
+    "vtracer_wasm.js",
+    "vtracer_wasm.d.ts"
+  ],
+  "main": "vtracer_wasm.js",
+  "types": "vtracer_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
