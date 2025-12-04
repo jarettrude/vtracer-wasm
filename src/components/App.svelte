@@ -302,15 +302,15 @@
         <!-- Drop zone / Upload prompt -->
         <div 
           id="droptext"
-          class="w-full max-w-xl aspect-video flex flex-col items-center justify-center border-2 border-dashed rounded-lg transition-colors {isDragging ? 'border-sky-400 bg-sky-400/10' : 'border-slate-600'}"
+          class="w-full max-w-xl aspect-video flex flex-col items-center justify-center border-2 border-dashed rounded-lg transition-colors p-8 {isDragging ? 'border-sky-400 bg-sky-400/10' : 'border-slate-600'}"
         >
           <img 
             src="/vtracer-wasm/VTRacer-WASM-Full.svg" 
             alt="VTracer WASM" 
-            class="max-w-xs mb-4 opacity-30 rounded-md object-contain"
+            class="max-w-xs my-4 opacity-30 rounded-md object-contain"
             loading="lazy"
           />
-          <p class="text-slate-400 text-lg mb-2 text-center px-4">
+          <p class="text-slate-400 text-lg mt-4 text-center px-4">
             Drag an image here, <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-xs">⌘V</kbd> to paste or 
             <label class="text-[#188F54] hover:text-[#95DB50] cursor-pointer underline">
               Select file
