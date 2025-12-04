@@ -46,12 +46,12 @@ export interface VectorizeOptions {
 export const DEFAULT_OPTIONS: VectorizeOptions = {
   colormode: 'color',
   mode: 'spline',
-  filter_speckle: 16, // 4*4 squared
-  corner_threshold: 60 * Math.PI / 180, // radians
+  filter_speckle: 16,
+  corner_threshold: 60 * Math.PI / 180,
   length_threshold: 4.0,
-  splice_threshold: 45 * Math.PI / 180, // radians
+  splice_threshold: 45 * Math.PI / 180,
   path_precision: 8,
-  color_precision: 2, // 8-6 = 2 (inverted)
+  color_precision: 2,
   layer_difference: 16,
   hierarchical: 'stacked',
 };

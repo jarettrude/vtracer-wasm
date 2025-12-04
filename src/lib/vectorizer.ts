@@ -70,7 +70,6 @@ export async function vectorize(
   
   onProgress?.('Loading WASM', 0);
   
-  // Initialize WASM module
   const wasm = await initWasm();
   
   onProgress?.('Processing', 0.1);
@@ -116,8 +115,6 @@ export async function vectorize(
   }
   
   const duration = performance.now() - startTime;
-  
-  // Count paths in SVG
   const pathCount = (svg.match(/<path/g) || []).length;
   
   if (pathCount === 0) {
@@ -160,7 +157,6 @@ export async function loadImage(file: File): Promise<ImageData> {
         return;
       }
       
-      // Limit size for performance
       const MAX_SIZE = 4096;
       let width = img.width;
       let height = img.height;

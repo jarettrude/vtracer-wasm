@@ -6,7 +6,6 @@
     downloadSvg,
     type VectorizeOptions  } from '../lib/vectorizer';
 
-  // State
   let file: File | null = $state(null);
   let imageData: ImageData | null = $state(null);
   let svgContent: string | null = $state(null);
@@ -18,11 +17,9 @@
   let imageWidth = $state(0);
   let imageHeight = $state(0);
   
-  // Canvas and SVG elements for overlay display (DOM refs)
   let canvasEl: HTMLCanvasElement | undefined = $state();
   let svgContainerEl: HTMLDivElement | undefined = $state();
-  
-  // Options matching official vtracer defaults
+
   let clusteringMode: 'color' | 'binary' = $state('color');
   let hierarchical: 'stacked' | 'cutout' = $state('stacked');
   let pathMode: 'spline' | 'polygon' | 'none' = $state('spline');
@@ -35,15 +32,12 @@
   let spliceThreshold = $state(45);
   let pathPrecision = $state(8);
 
-  // Derived: show/hide options based on mode
   let showColorOptions = $derived(clusteringMode === 'color');
   let showSplineOptions = $derived(pathMode === 'spline');
   let hasImage = $derived(imageData !== null);
-  
-  // Canvas opacity for fade effect during processing
+
   let canvasOpacity = $state(1);
 
-  // Mobile controls drawer
   let showMobileControls = $state(false);
   let activeTooltip: string | null = $state(null);
 
@@ -98,7 +92,6 @@
       imageWidth = imageData.width;
       imageHeight = imageData.height;
       
-      // Draw to canvas after a tick to ensure DOM is ready
       await new Promise(r => setTimeout(r, 0));
       if (canvasEl) {
         canvasEl.width = imageWidth;
@@ -109,7 +102,6 @@
         }
       }
       
-      // Auto-process on load
       await processImage();
     } catch (e) {
       error = `Failed to load image: ${e}`;
@@ -125,18 +117,12 @@
     progressValue = 0;
     canvasOpacity = 1;
     error = null;
-    svgContent = null; // Clear previous result to reset download button
+    svgContent = null;
 
-    // Clear previous SVG
     if (svgContainerEl) {
       svgContainerEl.innerHTML = '';
     }
 
-    // Allow UI to update before starting heavy computation
-    // We need multiple frame delays because:
-    // 1. tick() flushes Svelte's pending updates to the DOM
-    // 2. First rAF schedules after the current frame
-    // 3. Second rAF ensures the browser has actually painted
     await tick();
     await new Promise(r => requestAnimationFrame(r));
     await new Promise(r => requestAnimationFrame(r));
@@ -146,18 +132,17 @@
         colormode: clusteringMode === 'binary' ? 'bw' : 'color',
         mode: pathMode === 'none' ? 'pixel' : pathMode,
         hierarchical,
-        filter_speckle: filterSpeckle * filterSpeckle, // Square as per official
-        color_precision: 8 - colorPrecision, // Invert as per official
+        filter_speckle: filterSpeckle * filterSpeckle,
+        color_precision: 8 - colorPrecision,
         layer_difference: layerDifference,
-        corner_threshold: cornerThreshold * Math.PI / 180, // Convert to radians
+        corner_threshold: cornerThreshold * Math.PI / 180,
         length_threshold: lengthThreshold,
-        splice_threshold: spliceThreshold * Math.PI / 180, // Convert to radians
+        splice_threshold: spliceThreshold * Math.PI / 180,
         path_precision: pathPrecision,
       };
       
       const result = await vectorize(imageData, options, (stage, value) => {
         progressValue = value * 100;
-        // Fade canvas as processing progresses
         if (progressValue >= 50) {
           canvasOpacity = 0;
         } else {
@@ -167,18 +152,13 @@
       
       svgContent = result.svg;
       
-      // Parse SVG and inject into container for interactive display
       if (svgContainerEl) {
-        // Use innerHTML to inject SVG directly - this preserves namespaces better
-        // and is simpler than DOMParser for SVG content
         svgContainerEl.innerHTML = result.svg;
         const svgEl = svgContainerEl.querySelector('svg');
         if (svgEl) {
           svgEl.setAttribute('id', 'svg-output');
-          // Remove explicit width/height to let CSS control sizing
           svgEl.removeAttribute('width');
           svgEl.removeAttribute('height');
-          // Ensure SVG scales to fit container while preserving aspect ratio
           svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
           svgEl.style.position = 'absolute';
           svgEl.style.width = '100%';
@@ -232,7 +212,6 @@
     if (f) handleFile(f);
   }
   
-  // Clipboard paste support
   function handlePaste(e: ClipboardEvent) {
     const items = e.clipboardData?.items;
     if (!items) return;
@@ -251,16 +230,13 @@
 
   
   $effect(() => {
-    // Add paste listener
     document.addEventListener('paste', handlePaste);
     return () => document.removeEventListener('paste', handlePaste);
   });
   </script>
 
 <div class="min-h-screen bg-transparent text-gray-100 flex flex-col lg:flex-row">
-  <!-- Main Content -->
   <main class="flex-1 min-h-screen relative order-1 lg:order-2">
-    <!-- Mobile header + controls toggle -->
     <div class="lg:hidden flex items-center justify-between px-4 pt-4">
       <div class="flex items-center gap-2">
         <img 
@@ -280,7 +256,6 @@
       </button>
     </div>
 
-    <!-- Progress bar -->
     {#if processing}
       <div class="absolute top-0 left-0 right-0 z-50 bg-black/60 h-2">
         <div class="h-full bg-emerald-500 transition-all duration-100" style="width: {progressValue}%"></div>
@@ -290,7 +265,6 @@
       </div>
     {/if}
 
-    <!-- Canvas container -->
     <div 
       class="h-full flex flex-col items-center justify-center p-4 md:p-8 gap-4"
       ondragover={handleDragOver}
@@ -299,7 +273,6 @@
       role="application"
     >
       {#if !hasImage}
-        <!-- Drop zone / Upload prompt -->
         <div 
           id="droptext"
           class="w-full max-w-xl aspect-video flex flex-col items-center justify-center border-2 border-dashed rounded-lg transition-colors p-8 {isDragging ? 'border-sky-400 bg-sky-400/10' : 'border-slate-600'}"
@@ -311,7 +284,7 @@
             loading="lazy"
           />
           <p class="text-slate-400 text-lg mt-4 text-center px-4">
-            Drag an image here, <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-xs">⌘V</kbd> to paste or 
+            Drag an image here, <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-xs">⌘V</kbd> or <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-xs">Ctrl+C</kbd> to paste, or 
             <label class="text-[#188F54] hover:text-[#95DB50] cursor-pointer underline">
               Select file
               <input type="file" accept="image/*" class="hidden" onchange={handleFileInput} />
@@ -319,13 +292,11 @@
           </p>
         </div>
       {:else}
-        <!-- Image preview container -->
         <div 
           id="canvas-container" 
           class="relative max-w-full max-h-full"
           style="aspect-ratio: {imageWidth}/{imageHeight}; width: min(100%, calc(100vh - 4rem) * {imageWidth}/{imageHeight});"
         >
-          <!-- Canvas (original image) -->
           <canvas 
             bind:this={canvasEl}
             id="frame"
@@ -333,7 +304,6 @@
             style="opacity: {canvasOpacity}; display: {clusteringMode !== 'binary' ? 'block' : 'none'};"
           ></canvas>
           
-          <!-- SVG output overlay -->
           <div 
             bind:this={svgContainerEl}
             id="svg-container"
@@ -342,7 +312,6 @@
         </div>
       {/if}
 
-      <!-- Mobile primary actions below preview -->
       <div class="w-full max-w-xl lg:hidden flex gap-2">
         <button 
           onclick={processImage} 
@@ -370,9 +339,7 @@
     </div>
   </main>
 
-  <!-- Options Sidebar / Controls Drawer -->
   {#if showMobileControls}
-    <!-- Mobile / tablet backdrop -->
     <div 
       class="fixed inset-0 z-30 bg-black/60 lg:hidden"
       role="button"
@@ -388,7 +355,6 @@
     class:translate-x-full={!showMobileControls}
   >
     <div class="px-4 py-5 lg:px-6 lg:py-6 h-full md:flex md:flex-col md:justify-center">
-      <!-- Header -->
       <div class="mb-4 pb-3 border-b border-slate-700">
         <div class="flex flex-col items-center gap-3 mb-1">
           <img 
@@ -401,7 +367,6 @@
         </div>
       </div>
 
-      <!-- Action buttons (desktop) -->
       <div class="hidden lg:flex mb-4 gap-2">
         <button 
           onclick={processImage} 
@@ -427,7 +392,6 @@
         </button>
       </div>
 
-      <!-- Clustering Section -->
       <div class="mb-4">
         <div class="text-slate-400 mb-2 text-sm font-medium flex items-center gap-2 relative">
           <span>Clustering</span>
@@ -470,7 +434,6 @@
         </div>
       </div>
 
-      <!-- Filter Speckle -->
       <div class="mb-3">
         <div class="flex justify-between text-slate-400 text-sm mb-1">
           <div class="flex items-center gap-2 relative">
@@ -495,7 +458,6 @@
         <input type="range" min="1" max="16" step="1" bind:value={filterSpeckle} class="w-full" />
       </div>
 
-      <!-- Color-only options -->
       {#if showColorOptions}
         <div class="mb-3">
           <div class="flex justify-between text-slate-400 text-sm mb-1">
@@ -546,7 +508,6 @@
         </div>
       {/if}
 
-      <!-- Curve Fitting Section -->
       <div class="mb-4 pt-3 border-t border-slate-700">
         <div class="text-slate-400 mb-2 text-sm font-medium flex items-center gap-2 relative">
           <span>Curve Fitting</span>
@@ -582,7 +543,6 @@
         </div>
       </div>
 
-      <!-- Spline-only options -->
       {#if showSplineOptions}
         <div class="mb-3">
           <div class="flex justify-between text-slate-400 text-sm mb-1">
@@ -657,7 +617,6 @@
         </div>
       {/if}
       
-      <!-- Error display -->
       {#if error}
         <div class="mt-3 p-2 bg-red-500/20 border border-red-500/50 rounded text-red-400 text-xs">
           {error}
