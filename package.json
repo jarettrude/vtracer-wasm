@@ -8,13 +8,14 @@
     "build": "astro build",
     "preview": "astro preview",
     "lint": "tsc --noEmit",
-    "build:wasm": "./scripts/build-wasm.sh",
+    "build:wasm": "node ./scripts/build-wasm.mjs",
     "watch:wasm": "./scripts/watch-wasm.sh",
     "dev:all": "npm run build:wasm && concurrently \"npm run watch:wasm\" \"npm run dev\""
   },
   "dependencies": {
     "@astrojs/svelte": "^7.0.9",
     "astro": "^5.8.0",
+    "heic2any": "^0.0.4",
     "svelte": "^5.33.0"
   },
   "devDependencies": {

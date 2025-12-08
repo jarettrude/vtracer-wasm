@@ -5,8 +5,54 @@
 
 import type { VectorizeOptions } from './types.js';
 import { DEFAULT_OPTIONS } from './types.js';
+import heic2any from 'heic2any';
 
 const isDev = import.meta.env.DEV;
+
+/**
+ * Supported image MIME types and their handling
+ */
+const NATIVE_IMAGE_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/bmp',
+  'image/webp',
+  'image/avif',
+  'image/svg+xml',
+];
+
+const HEIC_TYPES = [
+  'image/heic',
+  'image/heif',
+  'image/heic-sequence',
+  'image/heif-sequence',
+];
+
+/**
+ * Check if a file is a HEIC/HEIF image (by MIME type or extension)
+ */
+function isHeicFile(file: File): boolean {
+  const mimeMatch = HEIC_TYPES.includes(file.type.toLowerCase());
+  const extMatch = /\.(heic|heif)$/i.test(file.name);
+  return mimeMatch || extMatch;
+}
+
+/**
+ * Convert HEIC/HEIF file to PNG blob for browser compatibility
+ */
+async function convertHeicToBlob(file: File): Promise<Blob> {
+  if (isDev) console.log('[vtracer] Converting HEIC to PNG...');
+  const result = await heic2any({
+    blob: file,
+    toType: 'image/png',
+    quality: 1,
+  });
+  // heic2any can return a single blob or array of blobs (for sequences)
+  const blob = Array.isArray(result) ? result[0] : result;
+  if (isDev) console.log('[vtracer] HEIC conversion complete');
+  return blob;
+}
 
 export type { VectorizeOptions } from './types.js';
 export { DEFAULT_OPTIONS } from './types.js';
@@ -141,11 +187,22 @@ export async function vectorize(
 
 /**
  * Load image from File object
+ * Supports: PNG, JPEG, GIF, BMP, WebP, AVIF, HEIC/HEIF
  */
 export async function loadImage(file: File): Promise<ImageData> {
+  // Convert HEIC/HEIF to PNG first (not natively supported in most browsers)
+  let imageBlob: Blob = file;
+  if (isHeicFile(file)) {
+    try {
+      imageBlob = await convertHeicToBlob(file);
+    } catch (e) {
+      throw new Error(`Failed to convert HEIC image: ${e}`);
+    }
+  }
+
   return new Promise((resolve, reject) => {
     const img = new Image();
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(imageBlob);
     
     img.onload = () => {
       const canvas = document.createElement('canvas');
@@ -178,7 +235,7 @@ export async function loadImage(file: File): Promise<ImageData> {
     
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error('Failed to load image'));
+      reject(new Error('Failed to load image. Format may not be supported by your browser.'));
     };
     
     img.src = url;

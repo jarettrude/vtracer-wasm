@@ -18,12 +18,14 @@ A browser-based image to SVG vectorizer powered by [VTracer](https://github.com/
 
 ```bash
 npm install
+npm run build:wasm   # download WASM artifacts from the vtracer repo
 npm run dev
 ```
 
 ## Build
 
 ```bash
+npm run build:wasm   # ensure WASM artifacts are present/updated
 npm run build
 ```
 

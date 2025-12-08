@@ -6,6 +6,7 @@
     downloadSvg,
     type VectorizeOptions  } from '../lib/vectorizer';
 
+  // State
   let file: File | null = $state(null);
   let imageData: ImageData | null = $state(null);
   let svgContent: string | null = $state(null);
@@ -17,9 +18,11 @@
   let imageWidth = $state(0);
   let imageHeight = $state(0);
   
+  // Canvas and SVG elements for overlay display (DOM refs)
   let canvasEl: HTMLCanvasElement | undefined = $state();
   let svgContainerEl: HTMLDivElement | undefined = $state();
 
+  // Options matching official vtracer defaults
   let clusteringMode: 'color' | 'binary' = $state('color');
   let hierarchical: 'stacked' | 'cutout' = $state('stacked');
   let pathMode: 'spline' | 'polygon' | 'none' = $state('spline');
@@ -32,12 +35,15 @@
   let spliceThreshold = $state(45);
   let pathPrecision = $state(8);
 
+  // Derived: show/hide options based on mode
   let showColorOptions = $derived(clusteringMode === 'color');
   let showSplineOptions = $derived(pathMode === 'spline');
   let hasImage = $derived(imageData !== null);
 
+  // Canvas opacity for fade effect during processing
   let canvasOpacity = $state(1);
 
+  // Mobile controls drawer
   let showMobileControls = $state(false);
   let activeTooltip: string | null = $state(null);
 
@@ -123,6 +129,11 @@
       svgContainerEl.innerHTML = '';
     }
 
+    // Allow UI to update before starting heavy computation
+    // We need multiple frame delays because:
+    // 1. tick() flushes Svelte's pending updates to the DOM
+    // 2. First rAF schedules after the current frame
+    // 3. Second rAF ensures the browser has actually painted
     await tick();
     await new Promise(r => requestAnimationFrame(r));
     await new Promise(r => requestAnimationFrame(r));

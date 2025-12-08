@@ -28,6 +28,7 @@ jobs:
       - name: Download latest WASM from vtracer fork
         run: |
           # Get assets from the rolling `wasm-latest` release tag in your vtracer fork
+          # Downloads: .wasm, .js, and .d.ts files
           RELEASE_URL=$(curl -s https://api.github.com/repos/jarettrude/vtracer/releases/tags/wasm-latest | jq -r '.assets[] | select(.name | endswith(".wasm") or endswith(".js") or endswith(".d.ts")) | .browser_download_url')
           
           mkdir -p src/lib/vtracer-wasm
