@@ -9,8 +9,7 @@
     "preview": "astro preview",
     "lint": "tsc --noEmit",
     "build:wasm": "node ./scripts/build-wasm.mjs",
-    "watch:wasm": "./scripts/watch-wasm.sh",
-    "dev:all": "npm run build:wasm && concurrently \"npm run watch:wasm\" \"npm run dev\""
+    "dev:all": "npm run build:wasm && npm run dev"
   },
   "dependencies": {
     "@astrojs/svelte": "^7.0.9",
