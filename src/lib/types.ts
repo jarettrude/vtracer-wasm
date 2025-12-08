@@ -1,18 +1,32 @@
 /**
- * Shared types for the vectorization library
+ * VTracer WASM - Type Definitions and Default Options
+ * 
+ * Core data structures for the vectorization engine including:
+ * - Geometric primitives (Point, Path, Color, CubicBezier)
+ * - Vectorization configuration options
+ * - Default parameters matching the official vtracer webapp
  */
 
+/**
+ * 2D point coordinate
+ */
 export interface Point {
   x: number;
   y: number;
 }
 
+/**
+ * SVG path data structure
+ */
 export interface Path {
   points: Point[];
   isHole: boolean;
   colorIndex: number;
 }
 
+/**
+ * RGBA color representation
+ */
 export interface Color {
   r: number;
   g: number;
@@ -20,6 +34,9 @@ export interface Color {
   a: number;
 }
 
+/**
+ * Cubic Bezier curve control points
+ */
 export interface CubicBezier {
   p0: Point;
   p1: Point;
@@ -27,6 +44,10 @@ export interface CubicBezier {
   p3: Point;
 }
 
+/**
+ * Vectorization processing options
+ * Controls how images are converted to SVG paths
+ */
 export interface VectorizeOptions {
   colormode: 'color' | 'bw';
   mode: 'spline' | 'polygon' | 'pixel';
@@ -40,9 +61,11 @@ export interface VectorizeOptions {
   hierarchical: 'stacked' | 'cutout';
 }
 
-// Defaults match official vtracer webapp
-// Note: corner_threshold and splice_threshold are in degrees here,
-// and should be converted to radians before passing to WASM
+/**
+ * Defaults match the official vtracer webapp.
+ * corner_threshold and splice_threshold are in degrees conceptually,
+ * but are pre-converted to radians here before passing to WASM.
+ */
 export const DEFAULT_OPTIONS: VectorizeOptions = {
   colormode: 'color',
   mode: 'spline',

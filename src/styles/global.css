@@ -1,6 +1,16 @@
+/**
+ * VTracer WASM - Global Styles
+ * 
+ * Comprehensive styling system including:
+ * - Custom scrollbar design for dark theme
+ * - Enhanced form controls (range inputs, selects)
+ * - Focus states and accessibility improvements
+ * - SVG hover effects and checkerboard backgrounds
+ * - Progress bar animations and transitions
+ */
+
 @import "tailwindcss";
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -19,7 +29,6 @@
   background: rgb(100 116 139);
 }
 
-/* Range input styling */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -80,7 +89,6 @@ input[type="range"]::-moz-range-thumb {
   border: none;
 }
 
-/* Select dropdown */
 .select-arrow {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239CA3AF'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -88,7 +96,6 @@ input[type="range"]::-moz-range-thumb {
   background-size: 16px;
 }
 
-/* Focus states */
 button:focus-visible,
 select:focus-visible,
 input:focus-visible {
@@ -96,13 +103,11 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
-/* SVG path hover effect - matches official vtracer */
 #svg-container svg path:hover {
   stroke: #ff0;
   stroke-width: 1px;
 }
 
-/* Checkerboard background to show transparency */
 #canvas-container {
   background-color: #1e293b;
   background-image: 
@@ -114,7 +119,6 @@ input:focus-visible {
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }
 
-/* Progress bar styling */
 progress {
   -webkit-appearance: none;
   appearance: none;

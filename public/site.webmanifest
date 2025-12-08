@@ -1,1 +1,89 @@
-{"name":"VTracer WASM","short_name":"VTracer","icons":[{"src":"/vtracer-wasm/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/vtracer-wasm/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#169255","background_color":"#000000","display":"standalone"}
+{
+  "name": "VTracer WASM - Image to SVG Converter",
+  "short_name": "VTracer",
+  "description": "Free offline image to SVG converter. Convert raster images to vector graphics entirely in your browser using WebAssembly. No uploads, complete privacy.",
+  "start_url": "/vtracer-wasm/",
+  "scope": "/vtracer-wasm/",
+  "id": "/vtracer-wasm/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "theme_color": "#188F54",
+  "background_color": "#000000",
+  "categories": ["graphics", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/vtracer-wasm/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/vtracer-wasm/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/vtracer-wasm/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/vtracer-wasm/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/vtracer-wasm/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/vtracer-wasm/VTRacer-WASM-Square.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/vtracer-wasm/VTRacer-WASM-Full.jpeg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "VTracer WASM Desktop Interface"
+    }
+  ],
+  "share_target": {
+    "action": "/vtracer-wasm/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "image",
+          "accept": ["image/*"]
+        }
+      ]
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/vtracer-wasm/",
+      "accept": {
+        "image/png": [".png"],
+        "image/jpeg": [".jpg", ".jpeg"],
+        "image/gif": [".gif"],
+        "image/webp": [".webp"],
+        "image/bmp": [".bmp"],
+        "image/heic": [".heic", ".heif"]
+      }
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "prefer_related_applications": false
+}

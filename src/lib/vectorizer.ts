@@ -1,6 +1,9 @@
 /**
- * VTracer WASM-based vectorization engine
- * Uses the real vtracer Rust library compiled to WebAssembly
+ * VTracer WASM Vectorization Engine
+ * 
+ * High-performance image-to-SVG conversion using WebAssembly.
+ * Supports multiple image formats including HEIC/HEIF, with real-time
+ * progress tracking and comprehensive vectorization options.
  */
 
 import type { VectorizeOptions } from './types.js';
@@ -10,6 +13,10 @@ const isDev = import.meta.env.DEV;
 
 /**
  * Supported image MIME types and their handling
+ */
+/**
+ * Supported image MIME types for native browser processing
+ * These formats can be handled directly without conversion
  */
 const NATIVE_IMAGE_TYPES = [
   'image/png',
@@ -21,6 +28,10 @@ const NATIVE_IMAGE_TYPES = [
   'image/svg+xml',
 ];
 
+/**
+ * HEIC/HEIF MIME types requiring conversion
+ * These formats need preprocessing before vectorization
+ */
 const HEIC_TYPES = [
   'image/heic',
   'image/heif',
@@ -31,6 +42,11 @@ const HEIC_TYPES = [
 /**
  * Check if a file is a HEIC/HEIF image (by MIME type or extension)
  */
+/**
+ * Check if a file is HEIC/HEIF format
+ * @param file - File object to check
+ * @returns boolean - True if HEIC/HEIF format
+ */
 function isHeicFile(file: File): boolean {
   const mimeMatch = HEIC_TYPES.includes(file.type.toLowerCase());
   const extMatch = /\.(heic|heif)$/i.test(file.name);
@@ -39,17 +55,18 @@ function isHeicFile(file: File): boolean {
 
 /**
  * Convert HEIC/HEIF file to PNG blob for browser compatibility
+ * Uses heic2any library for format conversion
+ * @param file - HEIC/HEIF file to convert
+ * @returns Promise<Blob> - Converted PNG blob
  */
 async function convertHeicToBlob(file: File): Promise<Blob> {
   if (isDev) console.log('[vtracer] Converting HEIC to PNG...');
-  // Dynamic import to avoid SSR issues (heic2any uses browser APIs)
   const heic2any = (await import('heic2any')).default;
   const result = await heic2any({
     blob: file,
     toType: 'image/png',
     quality: 1,
   });
-  // heic2any can return a single blob or array of blobs (for sequences)
   const blob = Array.isArray(result) ? result[0] : result;
   if (isDev) console.log('[vtracer] HEIC conversion complete');
   return blob;
@@ -58,11 +75,15 @@ async function convertHeicToBlob(file: File): Promise<Blob> {
 export type { VectorizeOptions } from './types.js';
 export { DEFAULT_OPTIONS } from './types.js';
 
-// WASM module instance
+/**
+ * WASM module instance cache
+ * Prevents multiple initialization of the same module
+ */
 let wasmModule: any = null;
 
 /**
- * Initialize the WASM module
+ * Initialize the WASM module with error handling
+ * @returns Promise<any> - Initialized WASM module instance
  */
 async function initWasm(): Promise<any> {
   if (wasmModule) return wasmModule;
@@ -99,12 +120,16 @@ export interface VectorizeResult {
 export type ProgressCallback = (stage: string, progress: number) => void;
 
 /**
- * Main vectorization function using real vtracer WASM
+ * Vectorize image data to SVG using WASM engine
+ * @param imageData - Image data to vectorize
+ * @param options - Vectorization parameters
+ * @param onProgress - Progress callback function
+ * @returns Promise<VectorizeResult> - SVG output and metadata
  */
 export async function vectorize(
   imageData: ImageData,
-  options: Partial<VectorizeOptions> = {},
-  onProgress?: ProgressCallback
+  options: VectorizeOptions = DEFAULT_OPTIONS,
+  onProgress?: (stage: string, value: number) => void
 ): Promise<VectorizeResult> {
   const startTime = performance.now();
   const opts = { ...DEFAULT_OPTIONS, ...options };
@@ -121,8 +146,6 @@ export async function vectorize(
   
   onProgress?.('Processing', 0.1);
   
-  // Build config JSON for vtracer
-  // visioncortex expects 0 <= color_precision < 8; enforce this here
   const colorPrecision = Math.max(0, Math.min(7, opts.color_precision));
   const config = {
     clustering_mode: opts.colormode === 'bw' ? 'binary' : 'color',
@@ -142,9 +165,6 @@ export async function vectorize(
   
   onProgress?.('Vectorizing', 0.3);
   
-  // Call the WASM function
-  // Note: data is Uint8ClampedArray, we need to copy it to Uint8Array
-  // Using data.buffer directly can cause issues with byte offset/length
   const imageBytes = new Uint8Array(data);
   if (isDev) console.log('[vtracer] Image bytes length:', imageBytes.length, 'expected:', width * height * 4);
   
@@ -190,8 +210,13 @@ export async function vectorize(
  * Load image from File object
  * Supports: PNG, JPEG, GIF, BMP, WebP, AVIF, HEIC/HEIF
  */
+/**
+ * Load image from File object with size optimization
+ * Supports: PNG, JPEG, GIF, BMP, WebP, AVIF, HEIC/HEIF
+ * @param file - File object to load
+ * @returns Promise<ImageData> - Processed image data
+ */
 export async function loadImage(file: File): Promise<ImageData> {
-  // Convert HEIC/HEIF to PNG first (not natively supported in most browsers)
   let imageBlob: Blob = file;
   if (isHeicFile(file)) {
     try {
@@ -244,7 +269,9 @@ export async function loadImage(file: File): Promise<ImageData> {
 }
 
 /**
- * Load image from URL
+ * Load image from URL with CORS support
+ * @param url - Image URL to load
+ * @returns Promise<ImageData> - Loaded image data
  */
 export async function loadImageFromUrl(url: string): Promise<ImageData> {
   return new Promise((resolve, reject) => {
@@ -283,14 +310,19 @@ export async function loadImageFromUrl(url: string): Promise<ImageData> {
 }
 
 /**
- * Convert SVG to data URL
+ * Convert SVG string to data URL for embedding
+ * @param svg - SVG string to convert
+ * @returns string - Base64-encoded data URL
  */
 export function svgToDataUrl(svg: string): string {
   return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
 }
 
 /**
- * Download SVG as file
+ * Download SVG content as a file
+ * Creates a temporary download link and triggers download
+ * @param svg - SVG content to download
+ * @param filename - Output filename (defaults to 'vector.svg')
  */
 export function downloadSvg(svg: string, filename: string = 'vector.svg'): void {
   const blob = new Blob([svg], { type: 'image/svg+xml' });

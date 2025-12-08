@@ -1,3 +1,10 @@
+<!--
+VTracer WASM - Main Application Component
+
+A fully client-side image to SVG converter using WebAssembly.
+Provides drag-and-drop, paste, and file input functionality with
+real-time vectorization progress and customizable parameters.
+-->
 <script lang="ts">
   import { tick } from 'svelte';
   import { 
@@ -6,7 +13,6 @@
     downloadSvg,
     type VectorizeOptions  } from '../lib/vectorizer';
 
-  // State
   let file: File | null = $state(null);
   let imageData: ImageData | null = $state(null);
   let svgContent: string | null = $state(null);
@@ -18,11 +24,9 @@
   let imageWidth = $state(0);
   let imageHeight = $state(0);
   
-  // Canvas and SVG elements for overlay display (DOM refs)
   let canvasEl: HTMLCanvasElement | undefined = $state();
   let svgContainerEl: HTMLDivElement | undefined = $state();
 
-  // Options matching official vtracer defaults
   let clusteringMode: 'color' | 'binary' = $state('color');
   let hierarchical: 'stacked' | 'cutout' = $state('stacked');
   let pathMode: 'spline' | 'polygon' | 'none' = $state('spline');
@@ -35,15 +39,12 @@
   let spliceThreshold = $state(45);
   let pathPrecision = $state(8);
 
-  // Derived: show/hide options based on mode
   let showColorOptions = $derived(clusteringMode === 'color');
   let showSplineOptions = $derived(pathMode === 'spline');
   let hasImage = $derived(imageData !== null);
 
-  // Canvas opacity for fade effect during processing
   let canvasOpacity = $state(1);
 
-  // Mobile controls drawer
   let showMobileControls = $state(false);
   let activeTooltip: string | null = $state(null);
 
@@ -59,11 +60,19 @@
   };
   const tooltipButtonClass = 'w-5 h-5 text-[10px] font-semibold italic rounded-full border border-emerald-700 text-emerald-300 flex items-center justify-center hover:bg-emerald-900/40';
 
-  function toggleTooltip(id: string) {
+  /**
+ * Toggle tooltip visibility for parameter explanations
+ * @param id - Tooltip identifier to toggle
+ */
+function toggleTooltip(id: string) {
     activeTooltip = activeTooltip === id ? null : id;
   }
 
-  function resetImage() {
+  /**
+ * Reset all application state and clear UI elements
+ * Clears image data, SVG output, progress, and canvas/SVG containers
+ */
+function resetImage() {
     file = null;
     imageData = null;
     svgContent = null;
@@ -84,7 +93,11 @@
     }
   }
 
-  async function handleFile(f: File) {
+  /**
+ * Handle file input and initiate image processing
+ * @param f - File object to process
+ */
+async function handleFile(f: File) {
     if (!f.type.startsWith('image/')) {
       error = 'Please select an image file';
       return;
@@ -114,7 +127,12 @@
     }
   }
 
-  async function processImage() {
+  /**
+ * Process the loaded image using WASM vectorization
+ * Converts ImageData to SVG with current parameter settings
+ * Updates progress and handles UI state during processing
+ */
+async function processImage() {
     if (!imageData) return;
     if (processing) {
       return;
@@ -193,37 +211,62 @@
     }
   }
 
-  function handleDownload() {
+  /**
+ * Download the generated SVG as a file
+ * Uses the original filename with .svg extension
+ */
+function handleDownload() {
     if (svgContent) {
       const filename = file?.name.replace(/\.[^.]+$/, '.svg') || 'export.svg';
       downloadSvg(svgContent, filename);
     }
   }
 
-  function handleDragOver(e: DragEvent) { 
+  /**
+ * Handle drag over event for drag-and-drop functionality
+ * @param e - DragEvent
+ */
+function handleDragOver(e: DragEvent) { 
     e.preventDefault(); 
     isDragging = true; 
   }
   
-  function handleDragLeave(e: DragEvent) { 
+  /**
+ * Handle drag leave event
+ * @param e - DragEvent
+ */
+function handleDragLeave(e: DragEvent) { 
     e.preventDefault();
     isDragging = false; 
   }
   
-  function handleDrop(e: DragEvent) {
+  /**
+ * Handle file drop event
+ * @param e - DragEvent containing dropped files
+ */
+function handleDrop(e: DragEvent) {
     e.preventDefault();
     isDragging = false;
     const f = e.dataTransfer?.files[0];
     if (f) handleFile(f);
   }
 
-  function handleFileInput(e: Event) {
+  /**
+ * Handle file input change event
+ * @param e - Event from file input element
+ */
+function handleFileInput(e: Event) {
     const input = e.target as HTMLInputElement;
     const f = input.files?.[0];
     if (f) handleFile(f);
   }
   
-  function handlePaste(e: ClipboardEvent) {
+  /**
+ * Handle paste events for image data from clipboard
+ * Extracts image blobs from clipboard and processes them
+ * @param e - ClipboardEvent
+ */
+function handlePaste(e: ClipboardEvent) {
     const items = e.clipboardData?.items;
     if (!items) return;
     
