@@ -5,7 +5,6 @@
 
 import type { VectorizeOptions } from './types.js';
 import { DEFAULT_OPTIONS } from './types.js';
-import heic2any from 'heic2any';
 
 const isDev = import.meta.env.DEV;
 
@@ -43,6 +42,8 @@ function isHeicFile(file: File): boolean {
  */
 async function convertHeicToBlob(file: File): Promise<Blob> {
   if (isDev) console.log('[vtracer] Converting HEIC to PNG...');
+  // Dynamic import to avoid SSR issues (heic2any uses browser APIs)
+  const heic2any = (await import('heic2any')).default;
   const result = await heic2any({
     blob: file,
     toType: 'image/png',
