@@ -146,7 +146,7 @@ export async function vectorize(
   
   onProgress?.('Processing', 0.1);
   
-  const colorPrecision = Math.max(0, Math.min(7, opts.color_precision));
+  const colorPrecision = Math.max(1, Math.min(8, opts.color_precision));
   const config = {
     clustering_mode: opts.colormode === 'bw' ? 'binary' : 'color',
     mode: opts.mode,

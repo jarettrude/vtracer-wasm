@@ -62,19 +62,20 @@ export interface VectorizeOptions {
 }
 
 /**
- * Defaults match the official vtracer webapp.
- * corner_threshold and splice_threshold are in degrees conceptually,
- * but are pre-converted to radians here before passing to WASM.
+ * Default options (RAW values matching WasmConfig expectations).
+ * - corner_threshold / splice_threshold: degrees (i32 in WASM)
+ * - filter_speckle: raw size threshold (WASM squares internally)
+ * - color_precision: raw 1–8 (WASM clamps + inverts internally)
  */
 export const DEFAULT_OPTIONS: VectorizeOptions = {
   colormode: 'color',
   mode: 'spline',
-  filter_speckle: 16,
-  corner_threshold: 60 * Math.PI / 180,
+  filter_speckle: 4,
+  corner_threshold: 60,
   length_threshold: 4.0,
-  splice_threshold: 45 * Math.PI / 180,
+  splice_threshold: 45,
   path_precision: 8,
-  color_precision: 2,
+  color_precision: 6,
   layer_difference: 16,
   hierarchical: 'stacked',
 };

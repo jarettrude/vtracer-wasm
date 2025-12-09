@@ -41,7 +41,7 @@ import '../styles/global.css';
     <link rel="icon" type="image/png" sizes="16x16" href="/vtracer-wasm/favicon-16x16.png" />
     <link rel="shortcut icon" href="/vtracer-wasm/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/vtracer-wasm/apple-touch-icon.png" />
-    <link rel="mask-icon" href="/vtracer-wasm/favicon.svg" color="#188F54" />
+    <link rel="mask-icon" href="/vtracer-wasm/VTRacer-WASM-Square-Black.svg" color="#188F54" />
     <link rel="manifest" href="/vtracer-wasm/site.webmanifest" crossorigin="use-credentials" />
     
     <title>VTracer WASM - 100% Client-Side Image to SVG</title>
@@ -72,8 +72,28 @@ import '../styles/global.css';
         </button>
       </div>
     </div>
-    <div id="offline-indicator" class="hidden fixed top-0 left-0 right-0 bg-amber-600 text-white text-center py-2 text-sm font-medium z-50">
-      You're offline — VTracer still works!
+    <div id="offline-indicator" class="hidden fixed top-4 right-4 w-[75%] max-w-4xl bg-emerald-700 text-white py-2 text-sm font-medium z-50 rounded-l-full rounded-r-lg shadow-lg border border-emerald-500/60">
+      <div class="px-4 flex items-center justify-between gap-3">
+        <span class="text-center flex-1">You're offline — VTracer still works!</span>
+        <div class="flex items-center gap-2">
+          <button id="offline-minimize" class="rounded-full bg-emerald-800/70 hover:bg-emerald-800 text-white text-xs px-3 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" aria-label="Minimize offline banner">
+            Minimize
+          </button>
+          <button id="offline-close" class="shrink-0 text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" aria-label="Dismiss offline banner">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="offline-pill" class="hidden fixed bottom-4 right-4 bg-emerald-700 text-white text-sm font-medium px-3 py-2 rounded-full shadow-lg z-50 items-center gap-2 border border-emerald-500/60">
+      <span>Offline</span>
+      <button id="offline-pill-expand" class="text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" aria-label="Expand offline details">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
     </div>
     <div id="update-banner" class="hidden fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-slate-900 border border-sky-600 rounded-lg p-4 shadow-xl z-50">
       <div class="flex items-center gap-3">
@@ -124,26 +144,112 @@ import '../styles/global.css';
       
       // Handle offline indicator
       const offlineIndicator = document.getElementById('offline-indicator');
-      
+      const offlineClose = document.getElementById('offline-close');
+      const offlineMinimize = document.getElementById('offline-minimize');
+      const offlinePill = document.getElementById('offline-pill');
+      const offlinePillExpand = document.getElementById('offline-pill-expand');
+
+      let minimizedTimer = null;
+      let dismissedUntilReconnect = false;
+
+      const showIndicator = () => {
+        if (dismissedUntilReconnect) return;
+        offlineIndicator?.classList.remove('hidden');
+        offlinePill?.classList.add('hidden');
+        clearMinimizeTimer();
+        scheduleMinimize();
+      };
+
+      const hideIndicator = () => {
+        offlineIndicator?.classList.add('hidden');
+        clearMinimizeTimer();
+      };
+
+      const showPill = () => {
+        offlineIndicator?.classList.add('hidden');
+        offlinePill?.classList.remove('hidden');
+      };
+
+      const hidePill = () => {
+        offlinePill?.classList.add('hidden');
+      };
+
+      const clearMinimizeTimer = () => {
+        if (minimizedTimer !== null) {
+          window.clearTimeout(minimizedTimer);
+          minimizedTimer = null;
+        }
+      };
+
+      const scheduleMinimize = () => {
+        clearMinimizeTimer();
+        minimizedTimer = window.setTimeout(() => {
+          showPill();
+        }, 8000);
+      };
+
       window.addEventListener('online', () => {
-        offlineIndicator?.classList.add('hidden');
+        dismissedUntilReconnect = false;
+        hideIndicator();
+        hidePill();
       });
-      
+
       window.addEventListener('offline', () => {
-        offlineIndicator?.classList.remove('hidden');
+        showIndicator();
       });
-      
+
       window.addEventListener('pwa:offline', () => {
-        offlineIndicator?.classList.remove('hidden');
+        showIndicator();
       });
-      
+
       window.addEventListener('pwa:online', () => {
-        offlineIndicator?.classList.add('hidden');
+        dismissedUntilReconnect = false;
+        hideIndicator();
+        hidePill();
       });
-      
+
       if (!navigator.onLine) {
-        offlineIndicator?.classList.remove('hidden');
+        showIndicator();
       }
+
+      offlineClose?.addEventListener('click', () => {
+        dismissedUntilReconnect = true;
+        hideIndicator();
+        hidePill();
+      });
+
+      offlineMinimize?.addEventListener('click', () => {
+        dismissedUntilReconnect = false;
+        showPill();
+      });
+
+      offlinePillExpand?.addEventListener('click', () => {
+        dismissedUntilReconnect = false;
+        hidePill();
+        showIndicator();
+      });
+
+      // Expose manual controls for debugging or other UI hooks
+      globalThis.offlineBanner = {
+        show: () => {
+          dismissedUntilReconnect = false;
+          showIndicator();
+        },
+        hide: () => {
+          dismissedUntilReconnect = true;
+          hideIndicator();
+          hidePill();
+        },
+        reset: () => {
+          dismissedUntilReconnect = false;
+          hidePill();
+          showIndicator();
+        },
+        pill: {
+          show: () => showPill(),
+          hide: () => hidePill(),
+        },
+      };
       
       const updateBanner = document.getElementById('update-banner');
       const updateBtn = document.getElementById('update-btn');

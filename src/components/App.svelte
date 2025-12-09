@@ -147,11 +147,6 @@ async function processImage() {
       svgContainerEl.innerHTML = '';
     }
 
-    // Allow UI to update before starting heavy computation
-    // We need multiple frame delays because:
-    // 1. tick() flushes Svelte's pending updates to the DOM
-    // 2. First rAF schedules after the current frame
-    // 3. Second rAF ensures the browser has actually painted
     await tick();
     await new Promise(r => requestAnimationFrame(r));
     await new Promise(r => requestAnimationFrame(r));
@@ -161,12 +156,12 @@ async function processImage() {
         colormode: clusteringMode === 'binary' ? 'bw' : 'color',
         mode: pathMode === 'none' ? 'pixel' : pathMode,
         hierarchical,
-        filter_speckle: filterSpeckle * filterSpeckle,
-        color_precision: 8 - colorPrecision,
+        filter_speckle: filterSpeckle,
+        color_precision: colorPrecision,
         layer_difference: layerDifference,
-        corner_threshold: cornerThreshold * Math.PI / 180,
+        corner_threshold: Math.round(cornerThreshold),
         length_threshold: lengthThreshold,
-        splice_threshold: spliceThreshold * Math.PI / 180,
+        splice_threshold: Math.round(spliceThreshold),
         path_precision: pathPrecision,
       };
       
@@ -689,10 +684,14 @@ function handlePaste(e: ClipboardEvent) {
       {/if}
       <div class="mt-4 pt-3 border-t border-emerald-800 text-xs text-emerald-500/80">
         <div class="mt-2">100% Client-Side • WASM Powered</div>
-        <div class="flex gap-3 text-xs mt-2">
+        <div class="flex flex-wrap gap-3 text-xs mt-2 items-center">
           <a href="https://www.visioncortex.org/vtracer-docs" target="_blank" class="text-gray-400 hover:text-white">VTracer Docs</a>
-          <span class="text-gray-500"> | </span>
+          <span class="text-gray-500">|</span>
           <a href="https://github.com/jarettrude/vtracer-wasm" target="_blank" class="text-gray-400 hover:text-white">GitHub</a>
+          <span class="text-gray-500">|</span>
+          <a href="/vtracer-wasm/privacy-policy" class="text-gray-400 hover:text-white">Privacy</a>
+          <span class="text-gray-500">|</span>
+          <a href="/vtracer-wasm/terms-of-service" class="text-gray-400 hover:text-white">Terms</a>
         </div>
       </div>
     </div>

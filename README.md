@@ -14,6 +14,11 @@ A browser-based image to SVG vectorizer powered by [VTracer](https://github.com/
 
 [https://jarettrude.github.io/vtracer-wasm](https://jarettrude.github.io/vtracer-wasm)
 
+### Policies
+
+- [Privacy Policy](https://jarettrude.github.io/vtracer-wasm/privacy-policy) — 100% client-side; no uploads, cookies, or trackers.
+- [Terms of Service](https://jarettrude.github.io/vtracer-wasm/terms-of-service) — Free, as-is tool; see acceptable use and disclaimers.
+
 ## Development
 
 ```bash
