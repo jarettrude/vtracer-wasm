@@ -9,7 +9,7 @@
  * - Automatic cache cleanup on updates
  */
 
-const CACHE_NAME = 'vtracer-wasm-v1';
+const CACHE_NAME = 'vtracer-wasm-v2';
 const BASE_PATH = '/vtracer-wasm';
 
 const PRECACHE_ASSETS = [
