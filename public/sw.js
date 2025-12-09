@@ -10,7 +10,15 @@
  */
 
 const CACHE_NAME = 'vtracer-wasm-v2';
-const BASE_PATH = '/vtracer-wasm';
+const BASE_PATH = (() => {
+  try {
+    const url = new URL(self.location.href);
+    const path = url.pathname.replace(/\/[^/]*$/, '');
+    return path.endsWith('/') ? path.slice(0, -1) || '/' : path || '/';
+  } catch (e) {
+    return '/';
+  }
+})();
 
 const PRECACHE_ASSETS = [
   `${BASE_PATH}/`,

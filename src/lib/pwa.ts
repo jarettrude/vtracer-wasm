@@ -41,10 +41,12 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   }
 
   try {
-    const swPath = '/vtracer-wasm/sw.js';
-    
+    const baseUrl = (import.meta as any).env?.BASE_URL ?? '/';
+    const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+    const swPath = `${normalizedBase}sw.js`;
+
     swRegistration = await navigator.serviceWorker.register(swPath, {
-      scope: '/vtracer-wasm/',
+      scope: normalizedBase,
     });
 
     console.log('[PWA] Service worker registered:', swRegistration.scope);
